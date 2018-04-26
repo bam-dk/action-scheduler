@@ -98,16 +98,21 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		}
 	}
 
-
-	protected function create_post_array( ActionScheduler_Action $action, DateTime $date = NULL ) {
+	protected function create_post_array( ActionScheduler_Action $action, DateTime $date = null, DateTime $last_attempt = null ) {
 		$post = array(
-			'post_type' => self::POST_TYPE,
-			'post_title' => $action->get_hook(),
-			'post_content' => json_encode($action->get_args()),
-			'post_status' => ( $action->is_finished() ? 'publish' : 'pending' ),
-			'post_date_gmt' => $this->get_timestamp($action, $date),
-			'post_date' => $this->get_local_timestamp($action, $date),
+			'post_type'     => self::POST_TYPE,
+			'post_title'    => $action->get_hook(),
+			'post_content'  => json_encode( $action->get_args() ),
+			'post_status'   => ( $action->is_finished() ? 'publish' : 'pending' ),
+			'post_date_gmt' => $this->get_timestamp( $action, $date ),
+			'post_date'     => $this->get_local_timestamp( $action, $date ),
 		);
+
+		if ( null !== $last_attempt ) {
+			$post['post_modified_gmt'] = $this->get_timestamp( $action, $last_attempt );
+			$post['post_modified']     = $this->get_local_timestamp( $action, $last_attempt );
+		}
+
 		return $post;
 	}
 
